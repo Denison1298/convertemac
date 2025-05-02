@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversor de Endereço MAC e Serial</title>
+    <title>Conversor de MAC e Serial</title>
     <link rel="icon" type="image/x-icon" href="https://sistemas.wuaze.com/Img/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Conversor de Endereço MAC e Serial</h1>
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Conversor de MAC e Serial</h1>
         
         <!-- Tabs -->
         <div class="flex border-b border-gray-300 mb-6">
@@ -25,7 +25,7 @@
                 class="flex-1 py-2 px-4 text-center font-medium text-gray-600 border-b-2 border-transparent hover:text-blue-600"
                 onclick="switchTab('serial')"
             >
-                Concatenar Serial
+                Conversor MAC para SN
             </button>
         </div>
 
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <!-- Serial Concatenation Tab -->
+        <!-- Serial Converter Tab -->
         <div id="serialContent" class="tab-content hidden">
             <div class="mb-4">
                 <label for="modelSelect" class="block text-sm font-medium text-gray-700 mb-2">
@@ -91,7 +91,7 @@
             </div>
             <div class="mb-4">
                 <label for="serialInput" class="block text-sm font-medium text-gray-700 mb-2">
-                    Insira o Serial/MAC (ex.: ZTEGD5F27DBF)
+                    Insira o MAC (ex.: ZTEGD5F27DBF)
                 </label>
                 <input
                     type="text"
@@ -101,13 +101,13 @@
                 />
             </div>
             <button
-                onclick="concatenateSerial()"
+                onclick="convertToSerialNumber()"
                 class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
             >
-                Concatenar
+                Converter para SN
             </button>
             <div id="serialResult" class="mt-6 text-center">
-                <p class="text-gray-700">Serial Concatenado:</p>
+                <p class="text-gray-700">Número de Série (SN):</p>
                 <div class="flex items-center justify-center mt-2">
                     <p id="serialOutput" class="text-lg font-mono text-gray-900"></p>
                     <button
@@ -218,23 +218,23 @@
             });
         }
 
-        // Serial Concatenation Functions
+        // Serial Converter Functions
         const modelConfig = {
-            'Intelbras': { prefix: '49544253', inputPrefix: 'INTB' },
-            'FiberHome': { prefix: '46485454', inputPrefix: 'FHTT' },
-            'Easy4link': { prefix: '46485454', inputPrefix: 'EASY' },
-            'ZTE': { prefix: '5A544547', inputPrefix: 'ZTEG' },
-            'VSOL': { prefix: '47504F4E', inputPrefix: 'VSOL' },
-            'Nokia': { prefix: '4E42454C', inputPrefix: 'NOKI' },
-            'Multilaser': { prefix: '44443136', inputPrefix: 'MULT' },
-            'Alcatel': { prefix: '414C434C', inputPrefix: 'ALCL' },
-            'Tenda': { prefix: '32303037', inputPrefix: 'TEND' },
-            'Monu': { prefix: '4D4F4E55', inputPrefix: 'MONU' },
-            'Ubiquiti': { prefix: '55424E54', inputPrefix: 'UBNT' },
-            'Huawei': { prefix: '48575443', inputPrefix: 'HWTC' }
+            'Intelbras': { prefix: '49544253' },
+            'FiberHome': { prefix: '46485454' },
+            'Easy4link': { prefix: '46485454' },
+            'ZTE': { prefix: '5A544547' },
+            'VSOL': { prefix: '47504F4E' },
+            'Nokia': { prefix: '4E42454C' },
+            'Multilaser': { prefix: '44443136' },
+            'Alcatel': { prefix: '414C434C' },
+            'Tenda': { prefix: '32303037' },
+            'Monu': { prefix: '4D4F4E55' },
+            'Ubiquiti': { prefix: '55424E54' },
+            'Huawei': { prefix: '48575443' }
         };
 
-        function concatenateSerial() {
+        function convertToSerialNumber() {
             const model = document.getElementById('modelSelect').value;
             const serialInput = document.getElementById('serialInput').value.trim().toUpperCase();
             const serialOutput = document.getElementById('serialOutput');
@@ -243,21 +243,19 @@
 
             const cleanSerial = serialInput.replace(/[^A-Z0-9]/gi, '');
             const config = modelConfig[model] || {};
-            const inputPrefix = config.inputPrefix || '';
-            const expectedLength = inputPrefix.length + 8; // 4 (prefix) + 8 (serial)
 
-            // Check if input length is valid
-            if (cleanSerial.length !== expectedLength || !cleanSerial.startsWith(inputPrefix)) {
-                serialOutput.textContent = `Serial/MAC inválido! Insira um serial com o prefixo ${inputPrefix} seguido de 8 caracteres alfanuméricos.`;
+            // Validação do input
+            if (cleanSerial.length < 8) {
+                serialOutput.textContent = 'MAC inválido! Insira um MAC com pelo menos 8 caracteres alfanuméricos (ex.: ZTEGD5F27DBF).';
                 serialOutput.classList.add('text-red-600');
                 copySerialButton.classList.add('hidden');
                 serialCopyFeedback.classList.add('hidden');
                 return;
             }
 
-            // Remove the input prefix and concatenate with the model prefix
-            const serialWithoutPrefix = cleanSerial.slice(inputPrefix.length);
-            const concatenated = config.prefix + serialWithoutPrefix;
+            // Extrai os últimos 8 caracteres e concatena com o prefixo do modelo
+            const serialLast8 = cleanSerial.slice(-8);
+            const concatenated = config.prefix + serialLast8;
             serialOutput.textContent = concatenated;
             serialOutput.classList.remove('text-red-600');
             copySerialButton.classList.remove('hidden');
@@ -295,7 +293,7 @@
 
         document.getElementById('serialInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                concatenateSerial();
+                convertToSerialNumber();
             }
         });
     </script>

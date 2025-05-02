@@ -3,29 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversor de Endereço MAC e Serial</title>
+    <title>Conversor de MAC e Serial</title>
     <link rel="icon" type="image/x-icon" href="https://sistemas.wuaze.com/Img/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Conversor de Endereço MAC e Serial</h1>
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Conversor de MAC e Serial</h1>
         
         <!-- Tabs -->
         <div class="flex border-b border-gray-300 mb-6">
             <button
                 id="macTab"
-                class="flex-1 py-2 px-4 text-center font-medium text-blue-600 border-b-2 border-blue-600"
-                onclick="switchTab('mac')"
-            >
-                Conversor MAC
+                class="flex-1 py-2 px-4 text-center font-medium text-blue-600 border-b-2 border-blue area'specific_prefix': 'ZTEG', // Prefixo específico do modelo (ex.: ZTEG para ZTE)
             </button>
             <button
                 id="serialTab"
                 class="flex-1 py-2 px-4 text-center font-medium text-gray-600 border-b-2 border-transparent hover:text-blue-600"
                 onclick="switchTab('serial')"
             >
-                Concatenar Serial
+                Conversor MAC para SN
             </button>
         </div>
 
@@ -91,7 +88,7 @@
             </div>
             <div class="mb-4">
                 <label for="serialInput" class="block text-sm font-medium text-gray-700 mb-2">
-                    Insira o Serial/MAC (ex.: ZTEGD5F27DBF)
+                    Insira o MAC (ex.: ZTEGD5F27DBF)
                 </label>
                 <input
                     type="text"
@@ -104,10 +101,10 @@
                 onclick="concatenateSerial()"
                 class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
             >
-                Concatenar
+                Converter para SN
             </button>
             <div id="serialResult" class="mt-6 text-center">
-                <p class="text-gray-700">Serial Concatenado:</p>
+                <p class="text-gray-700">Número de Série (SN):</p>
                 <div class="flex items-center justify-center mt-2">
                     <p id="serialOutput" class="text-lg font-mono text-gray-900"></p>
                     <button
@@ -246,16 +243,16 @@
             const inputPrefix = config.inputPrefix || '';
             const expectedLength = inputPrefix.length + 8; // 4 (prefix) + 8 (serial)
 
-            // Check if input length is valid
+            // Validação do input
             if (cleanSerial.length !== expectedLength || !cleanSerial.startsWith(inputPrefix)) {
-                serialOutput.textContent = `Serial/MAC inválido! Insira um serial com o prefixo ${inputPrefix} seguido de 8 caracteres alfanuméricos.`;
+                serialOutput.textContent = `MAC inválido! Insira um MAC com o prefixo ${inputPrefix} seguido de 8 caracteres alfanuméricos (ex.: ${inputPrefix}D5F27DBF).`;
                 serialOutput.classList.add('text-red-600');
                 copySerialButton.classList.add('hidden');
                 serialCopyFeedback.classList.add('hidden');
                 return;
             }
 
-            // Remove the input prefix and concatenate with the model prefix
+            // Remove o prefixo do input e concatena com o prefixo do modelo
             const serialWithoutPrefix = cleanSerial.slice(inputPrefix.length);
             const concatenated = config.prefix + serialWithoutPrefix;
             serialOutput.textContent = concatenated;

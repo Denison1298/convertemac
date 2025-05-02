@@ -219,19 +219,19 @@
         }
 
         // Serial Concatenation Functions
-        const modelPrefixes = {
-            'Intelbras': '49544253',
-            'FiberHome': '46485454',
-            'Easy4link': '46485454',
-            'ZTE': '5A544547',
-            'VSOL': '47504F4E',
-            'Nokia': '4E42454C',
-            'Multilaser': '44443136',
-            'Alcatel': '414C434C',
-            'Tenda': '32303037',
-            'Monu': '4D4F4E55',
-            'Ubiquiti': '55424E54',
-            'Huawei': '48575443'
+        const modelConfig = {
+            'Intelbras': { prefix: '49544253', inputPrefix: 'INTB' },
+            'FiberHome': { prefix: '46485454', inputPrefix: 'FHTT' },
+            'Easy4link': { prefix: '46485454', inputPrefix: 'EASY' },
+            'ZTE': { prefix: '5A544547', inputPrefix: 'ZTEG' },
+            'VSOL': { prefix: '47504F4E', inputPrefix: 'VSOL' },
+            'Nokia': { prefix: '4E42454C', inputPrefix: 'NOKI' },
+            'Multilaser': { prefix: '44443136', inputPrefix: 'MULT' },
+            'Alcatel': { prefix: '414C434C', inputPrefix: 'ALCL' },
+            'Tenda': { prefix: '32303037', inputPrefix: 'TEND' },
+            'Monu': { prefix: '4D4F4E55', inputPrefix: 'MONU' },
+            'Ubiquiti': { prefix: '55424E54', inputPrefix: 'UBNT' },
+            'Huawei': { prefix: '48575443', inputPrefix: 'HWTC' }
         };
 
         function concatenateSerial() {
@@ -242,16 +242,22 @@
             const serialCopyFeedback = document.getElementById('serialCopyFeedback');
 
             const cleanSerial = serialInput.replace(/[^A-Z0-9]/gi, '');
-            if (cleanSerial.length !== 12) {
-                serialOutput.textContent = 'Serial/MAC inválido! Insira exatamente 12 caracteres alfanuméricos.';
+            const config = modelConfig[model] || {};
+            const inputPrefix = config.inputPrefix || '';
+            const expectedLength = inputPrefix.length + 8; // 4 (prefix) + 8 (serial)
+
+            // Check if input length is valid
+            if (cleanSerial.length !== expectedLength || !cleanSerial.startsWith(inputPrefix)) {
+                serialOutput.textContent = `Serial/MAC inválido! Insira um serial com o prefixo ${inputPrefix} seguido de 8 caracteres alfanuméricos.`;
                 serialOutput.classList.add('text-red-600');
                 copySerialButton.classList.add('hidden');
                 serialCopyFeedback.classList.add('hidden');
                 return;
             }
 
-            const prefix = modelPrefixes[model] || '';
-            const concatenated = prefix + cleanSerial;
+            // Remove the input prefix and concatenate with the model prefix
+            const serialWithoutPrefix = cleanSerial.slice(inputPrefix.length);
+            const concatenated = config.prefix + serialWithoutPrefix;
             serialOutput.textContent = concatenated;
             serialOutput.classList.remove('text-red-600');
             copySerialButton.classList.remove('hidden');

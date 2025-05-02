@@ -57,7 +57,17 @@
         </button>
         <div id="result" class="mt-6 text-center">
             <p class="text-gray-700">Endereço MAC Convertido:</p>
-            <p id="output" class="text-lg font-mono text-gray-900 mt-2"></p>
+            <div class="flex items-center justify-center mt-2">
+                <p id="output" class="text-lg font-mono text-gray-900"></p>
+                <button
+                    id="copyButton"
+                    onclick="copyMac()"
+                    class="ml-4 bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 transition duration-200 hidden"
+                >
+                    Copiar
+                </button>
+            </div>
+            <p id="copyFeedback" class="text-sm text-green-600 mt-2 hidden">Copiado para a área de transferência!</p>
         </div>
     </div>
 
@@ -65,6 +75,8 @@
         function convertMac() {
             const input = document.getElementById('macInput').value.trim().toUpperCase();
             const output = document.getElementById('output');
+            const copyButton = document.getElementById('copyButton');
+            const copyFeedback = document.getElementById('copyFeedback');
 
             // Remove quaisquer caracteres não alfanuméricos
             const cleanInput = input.replace(/[^A-Z0-9]/gi, '');
@@ -73,6 +85,8 @@
             if (cleanInput.length !== 12) {
                 output.textContent = 'Endereço MAC inválido! Insira exatamente 12 caracteres alfanuméricos.';
                 output.classList.add('text-red-600');
+                copyButton.classList.add('hidden');
+                copyFeedback.classList.add('hidden');
                 return;
             }
 
@@ -80,6 +94,30 @@
             const formattedMac = cleanInput.match(/.{1,2}/g).join(':');
             output.textContent = formattedMac;
             output.classList.remove('text-red-600');
+            copyButton.classList.remove('hidden');
+            copyFeedback.classList.add('hidden');
+        }
+
+        function copyMac() {
+            const output = document.getElementById('output').textContent;
+            const copyFeedback = document.getElementById('copyFeedback');
+
+            navigator.clipboard.writeText(output).then(() => {
+                copyFeedback.classList.remove('hidden');
+                setTimeout(() => {
+                    copyFeedback.classList.add('hidden');
+                }, 2000);
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+                copyFeedback.textContent = 'Erro ao copiar!';
+                copyFeedback.classList.remove('hidden');
+                copyFeedback.classList.add('text-red-600');
+                setTimeout(() => {
+                    copyFeedback.classList.add('hidden');
+                    copyFeedback.classList.remove('text-red-600');
+                    copyFeedback.textContent = 'Copiado para a área de transferência!';
+                }, 2000);
+            });
         }
 
         // Adiciona um ouvinte de evento para a tecla Enter

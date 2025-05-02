@@ -1,89 +1,186 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Converte a planilha para JSON para filtrar linhas em branco
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filtra linhas em branco (linhas onde todas as células estão vazias, nulas ou indefinidas)
-                var filteredData = jsonData.filter(row =>
-                    row.some(cell => cell !== '' && cell !== null && cell !== undefined)
-                );
-
-                // Converte o JSON filtrado de volta para CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData); // Cria uma nova planilha a partir do array de arrays filtrado
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-</script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversor de Endereço MAC</title>
+    <title>Conversor de Endereço MAC e Serial</title>
     <link rel="icon" type="image/x-icon" href="https://sistemas.wuaze.com/Img/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Conversor de Endereço MAC</h1>
-        <div class="mb-4">
-            <label for="macInput" class="block text-sm font-medium text-gray-700 mb-2">
-                Insira o Endereço MAC (ex.: FHTT10889E48)
-            </label>
-            <input
-                type="text"
-                id="macInput"
-                placeholder="FHTT10889E48"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Conversor de Endereço MAC e Serial</h1>
+        
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-300 mb-6">
+            <button
+                id="macTab"
+                class="flex-1 py-2 px-4 text-center font-medium text-blue-600 border-b-2 border-blue-600"
+                onclick="switchTab('mac')"
+            >
+                Conversor MAC
+            </button>
+            <button
+                id="serialTab"
+                class="flex-1 py-2 px-4 text-center font-medium text-gray-600 border-b-2 border-transparent hover:text-blue-600"
+                onclick="switchTab('serial')"
+            >
+                Concatenar Serial
+            </button>
         </div>
-        <button
-            onclick="convertMac()"
-            class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
-        >
-            Converter
-        </button>
-        <div id="result" class="mt-6 text-center">
-            <p class="text-gray-700">Endereço MAC Convertido:</p>
-            <div class="flex items-center justify-center mt-2">
-                <p id="output" class="text-lg font-mono text-gray-900"></p>
-                <button
-                    id="copyButton"
-                    onclick="copyMac()"
-                    class="ml-4 bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 transition duration-200 hidden flex items-center"
-                >
-                    <img src="https://sistemas.wuaze.com/Img/icon.png" alt="Favicon do site" class="w-4 h-4 mr-1">
-                    Copiar
-                </button>
+
+        <!-- MAC Converter Tab -->
+        <div id="macContent" class="tab-content">
+            <div class="mb-4">
+                <label for="macInput" class="block text-sm font-medium text-gray-700 mb-2">
+                    Insira o Endereço MAC (ex.: FHTT10889E48)
+                </label>
+                <input
+                    type="text"
+                    id="macInput"
+                    placeholder="FHTT10889E48"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
             </div>
-            <p id="copyFeedback" class="text-sm text-green-600 mt-2 hidden">Copiado para a área de transferência!</p>
+            <button
+                onclick="convertMac()"
+                class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
+            >
+                Converter
+            </button>
+            <div id="result" class="mt-6 text-center">
+                <p class="text-gray-700">Endereço MAC Convertido:</p>
+                <div class="flex items-center justify-center mt-2">
+                    <p id="output" class="text-lg font-mono text-gray-900"></p>
+                    <button
+                        id="copyButton"
+                        onclick="copyMac()"
+                        class="ml-4 bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 transition duration-200 hidden flex items-center"
+                    >
+                        <img src="https://sistemas.wuaze.com/Img/icon.png" alt="Favicon do site" class="w-4 h-4 mr-1">
+                        Copiar
+                    </button>
+                </div>
+                <p id="copyFeedback" class="text-sm text-green-600 mt-2 hidden">Copiado para a área de transferência!</p>
+            </div>
+        </div>
+
+        <!-- Serial Concatenation Tab -->
+        <div id="serialContent" class="tab-content hidden">
+            <div class="mb-4">
+                <label for="modelSelect" class="block text-sm font-medium text-gray-700 mb-2">
+                    Selecione o Modelo
+                </label>
+                <select
+                    id="modelSelect"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                    <option value="Intelbras">Intelbras (49544253)</option>
+                    <option value="FiberHome">FiberHome (46485454)</option>
+                    <option value="Easy4link">Easy 4link (46485454)</option>
+                    <option value="ZTE">ZTE (5A544547)</option>
+                    <option value="VSOL">VSOL (47504F4E)</option>
+                    <option value="Nokia">Nokia (4E42454C)</option>
+                    <option value="Multilaser">Multilaser (44443136)</option>
+                    <option value="Alcatel">Alcatel (414C434C)</option>
+                    <option value="Tenda">Tenda (32303037)</option>
+                    <option value="Monu">Monu (4D4F4E55)</option>
+                    <option value="Ubiquiti">Ubiquiti (55424E54)</option>
+                    <option value="Huawei">Huawei (48575443)</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="serialInput" class="block text-sm font-medium text-gray-700 mb-2">
+                    Insira o Serial/MAC (ex.: ZTEGD5F27DBF)
+                </label>
+                <input
+                    type="text"
+                    id="serialInput"
+                    placeholder="ZTEGD5F27DBF"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
+            <button
+                onclick="concatenateSerial()"
+                class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
+            >
+                Concatenar
+            </button>
+            <div id="serialResult" class="mt-6 text-center">
+                <p class="text-gray-700">Serial Concatenado:</p>
+                <div class="flex items-center justify-center mt-2">
+                    <p id="serialOutput" class="text-lg font-mono text-gray-900"></p>
+                    <button
+                        id="copySerialButton"
+                        onclick="copySerial()"
+                        class="ml-4 bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 transition duration-200 hidden flex items-center"
+                    >
+                        <img src="https://sistemas.wuaze.com/Img/icon.png" alt="Favicon do site" class="w-4 h-4 mr-1">
+                        Copiar
+                    </button>
+                </div>
+                <p id="serialCopyFeedback" class="text-sm text-green-600 mt-2 hidden">Copiado para a área de transferência!</p>
+            </div>
         </div>
     </div>
 
-    <script>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row =>
+                        row.some(cell => cell !== '' && cell !== null && cell !== undefined)
+                    );
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData);
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+
+        // Tab switching
+        function switchTab(tab) {
+            const macTab = document.getElementById('macTab');
+            const serialTab = document.getElementById('serialTab');
+            const macContent = document.getElementById('macContent');
+            const serialContent = document.getElementById('serialContent');
+
+            if (tab === 'mac') {
+                macTab.classList.add('text-blue-600', 'border-blue-600');
+                macTab.classList.remove('text-gray-600', 'border-transparent');
+                serialTab.classList.add('text-gray-600', 'border-transparent');
+                serialTab.classList.remove('text-blue-600', 'border-blue-600');
+                macContent.classList.remove('hidden');
+                serialContent.classList.add('hidden');
+            } else {
+                serialTab.classList.add('text-blue-600', 'border-blue-600');
+                serialTab.classList.remove('text-gray-600', 'border-transparent');
+                macTab.classList.add('text-gray-600', 'border-transparent');
+                macTab.classList.remove('text-blue-600', 'border-blue-600');
+                serialContent.classList.remove('hidden');
+                macContent.classList.add('hidden');
+            }
+        }
+
+        // MAC Converter Functions
         function convertMac() {
             const input = document.getElementById('macInput').value.trim().toUpperCase();
             const output = document.getElementById('output');
             const copyButton = document.getElementById('copyButton');
             const copyFeedback = document.getElementById('copyFeedback');
 
-            // Remove quaisquer caracteres não alfanuméricos
             const cleanInput = input.replace(/[^A-Z0-9]/gi, '');
-
-            // Verifica se a entrada é válida (12 caracteres)
             if (cleanInput.length !== 12) {
                 output.textContent = 'Endereço MAC inválido! Insira exatamente 12 caracteres alfanuméricos.';
                 output.classList.add('text-red-600');
@@ -92,7 +189,6 @@
                 return;
             }
 
-            // Converte para o formato com dois pontos
             const formattedMac = cleanInput.match(/.{1,2}/g).join(':');
             output.textContent = formattedMac;
             output.classList.remove('text-red-600');
@@ -122,10 +218,78 @@
             });
         }
 
-        // Adiciona um ouvinte de evento para a tecla Enter
+        // Serial Concatenation Functions
+        const modelPrefixes = {
+            'Intelbras': '49544253',
+            'FiberHome': '46485454',
+            'Easy4link': '46485454',
+            'ZTE': '5A544547',
+            'VSOL': '47504F4E',
+            'Nokia': '4E42454C',
+            'Multilaser': '44443136',
+            'Alcatel': '414C434C',
+            'Tenda': '32303037',
+            'Monu': '4D4F4E55',
+            'Ubiquiti': '55424E54',
+            'Huawei': '48575443'
+        };
+
+        function concatenateSerial() {
+            const model = document.getElementById('modelSelect').value;
+            const serialInput = document.getElementById('serialInput').value.trim().toUpperCase();
+            const serialOutput = document.getElementById('serialOutput');
+            const copySerialButton = document.getElementById('copySerialButton');
+            const serialCopyFeedback = document.getElementById('serialCopyFeedback');
+
+            const cleanSerial = serialInput.replace(/[^A-Z0-9]/gi, '');
+            if (cleanSerial.length !== 12) {
+                serialOutput.textContent = 'Serial/MAC inválido! Insira exatamente 12 caracteres alfanuméricos.';
+                serialOutput.classList.add('text-red-600');
+                copySerialButton.classList.add('hidden');
+                serialCopyFeedback.classList.add('hidden');
+                return;
+            }
+
+            const prefix = modelPrefixes[model] || '';
+            const concatenated = prefix + cleanSerial;
+            serialOutput.textContent = concatenated;
+            serialOutput.classList.remove('text-red-600');
+            copySerialButton.classList.remove('hidden');
+            serialCopyFeedback.classList.add('hidden');
+        }
+
+        function copySerial() {
+            const serialOutput = document.getElementById('serialOutput').textContent;
+            const serialCopyFeedback = document.getElementById('serialCopyFeedback');
+
+            navigator.clipboard.writeText(serialOutput).then(() => {
+                serialCopyFeedback.classList.remove('hidden');
+                setTimeout(() => {
+                    serialCopyFeedback.classList.add('hidden');
+                }, 2000);
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+                serialCopyFeedback.textContent = 'Erro ao copiar!';
+                serialCopyFeedback.classList.remove('hidden');
+                serialCopyFeedback.classList.add('text-red-600');
+                setTimeout(() => {
+                    serialCopyFeedback.classList.add('hidden');
+                    serialCopyFeedback.classList.remove('text-red-600');
+                    serialCopyFeedback.textContent = 'Copiado para a área de transferência!';
+                }, 2000);
+            });
+        }
+
+        // Event Listeners
         document.getElementById('macInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 convertMac();
+            }
+        });
+
+        document.getElementById('serialInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                concatenateSerial();
             }
         });
     </script>

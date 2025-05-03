@@ -6,23 +6,71 @@
     <title>Conversor de MAC e Serial</title>
     <link rel="icon" type="image/x-icon" href="https://sistemas.wuaze.com/Img/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            color: #295ba5;
+            border-bottom: 3px solid #295ba5;
+        }
+        .tab-button:hover {
+            color: #295ba5;
+            background-color: #dadf3f;
+        }
+        .input-field {
+            transition: all 0.2s ease;
+        }
+        .input-field:focus {
+            border-color: #295ba5;
+            box-shadow: 0 0 0 3px rgba(41, 91, 165, 0.2);
+        }
+        .primary-button {
+            background-color: #295ba5;
+        }
+        .primary-button:hover {
+            background-color: #1e4687;
+        }
+        .copy-button {
+            background-color: #dadf3f;
+            color: #333;
+        }
+        .copy-button:hover {
+            background-color: #c8cc2f;
+        }
+        .copy-feedback {
+            background-color: #dadf3f;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+        .error-text {
+            background-color: rgba(255, 0, 0, 0.1);
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Conversor de MAC e Serial</h1>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="bg-white p-10 rounded-xl shadow-xl w-full max-w-lg">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Conversor de MAC e Serial</h1>
         
         <!-- Tabs -->
-        <div class="flex border-b border-gray-300 mb-6">
+        <div class="flex border-b border-gray-200 mb-8">
             <button
                 id="macTab"
-                class="flex-1 py-2 px-4 text-center font-medium text-blue-600 border-b-2 border-blue-600"
+                class="tab-button flex-1 py-3 px-6 text-center font-medium text-blue-600 border-b-2 border-blue-600 active"
                 onclick="switchTab('mac')"
             >
                 Conversor MAC
             </button>
             <button
                 id="serialTab"
-                class="flex-1 py-2 px-4 text-center font-medium text-gray-600 border-b-2 border-transparent hover:text-blue-600"
+                class="tab-button flex-1 py-3 px-6 text-center font-medium text-gray-600 border-b-2 border-transparent"
                 onclick="switchTab('serial')"
             >
                 Conversor MAC para SN
@@ -31,7 +79,7 @@
 
         <!-- MAC Converter Tab -->
         <div id="macContent" class="tab-content">
-            <div class="mb-4">
+            <div class="mb-6">
                 <label for="macInput" class="block text-sm font-medium text-gray-700 mb-2">
                     Insira o Endereço MAC (ex.: FHTT10889E48)
                 </label>
@@ -39,41 +87,41 @@
                     type="text"
                     id="macInput"
                     placeholder="FHTT10889E48"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none"
                 />
             </div>
             <button
                 onclick="convertMac()"
-                class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
+                class="primary-button w-full text-white py-3 rounded-lg transition duration-200"
             >
                 Converter
             </button>
-            <div id="result" class="mt-6 text-center">
-                <p class="text-gray-700">Endereço MAC Convertido:</p>
-                <div class="flex items-center justify-center mt-2">
+            <div id="result" class="mt-8 text-center">
+                <p class="text-gray-700 font-medium">Endereço MAC Convertido:</p>
+                <div class="flex items-center justify-center mt-3">
                     <p id="output" class="text-lg font-mono text-gray-900"></p>
                     <button
                         id="copyButton"
                         onclick="copyMac()"
-                        class="ml-4 bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 transition duration-200 hidden flex items-center"
+                        class="copy-button ml-4 px-4 py-2 rounded-lg hidden flex items-center"
                     >
-                        <img src="https://sistemas.wuaze.com/Img/icon.png" alt="Favicon do site" class="w-4 h-4 mr-1">
+                        <img src="https://sistemas.wuaze.com/Img/icon.png" alt="Favicon do site" class="w-4 h-4 mr-2">
                         Copiar
                     </button>
                 </div>
-                <p id="copyFeedback" class="text-sm text-green-600 mt-2 hidden">Copiado para a área de transferência!</p>
+                <p id="copyFeedback" class="copy-feedback text-sm text-gray-800 mt-3 hidden">Copiado para a área de transferência!</p>
             </div>
         </div>
 
         <!-- Serial Converter Tab -->
         <div id="serialContent" class="tab-content hidden">
-            <div class="mb-4">
+            <div class="mb-6">
                 <label for="modelSelect" class="block text-sm font-medium text-gray-700 mb-2">
                     Selecione o Modelo
                 </label>
                 <select
                     id="modelSelect"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none"
                 >
                     <option value="Intelbras">Intelbras (49544253)</option>
                     <option value="FiberHome">FiberHome (46485454)</option>
@@ -89,7 +137,7 @@
                     <option value="Huawei">Huawei (48575443)</option>
                 </select>
             </div>
-            <div class="mb-4">
+            <div class="mb-6">
                 <label for="serialInput" class="block text-sm font-medium text-gray-700 mb-2">
                     Insira o MAC (ex.: ZTEGD5F27DBF)
                 </label>
@@ -97,29 +145,29 @@
                     type="text"
                     id="serialInput"
                     placeholder="ZTEGD5F27DBF"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none"
                 />
             </div>
             <button
                 onclick="convertToSerialNumber()"
-                class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
+                class="primary-button w-full text-white py-3 rounded-lg transition duration-200"
             >
                 Converter para SN
             </button>
-            <div id="serialResult" class="mt-6 text-center">
-                <p class="text-gray-700">Número de Série (SN):</p>
-                <div class="flex items-center justify-center mt-2">
+            <div id="serialResult" class="mt-8 text-center">
+                <p class="text-gray-700 font-medium">Número de Série (SN):</p>
+                <div class="flex items-center justify-center mt-3">
                     <p id="serialOutput" class="text-lg font-mono text-gray-900"></p>
                     <button
                         id="copySerialButton"
                         onclick="copySerial()"
-                        class="ml-4 bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 transition duration-200 hidden flex items-center"
+                        class="copy-button ml-4 px-4 py-2 rounded-lg hidden flex items-center"
                     >
-                        <img src="https://sistemas.wuaze.com/Img/icon.png" alt="Favicon do site" class="w-4 h-4 mr-1">
+                        <img src="https://sistemas.wuaze.com/Img/icon.png" alt="Favicon do site" class="w-4 h-4 mr-2">
                         Copiar
                     </button>
                 </div>
-                <p id="serialCopyFeedback" class="text-sm text-green-600 mt-2 hidden">Copiado para a área de transferência!</p>
+                <p id="serialCopyFeedback" class="copy-feedback text-sm text-gray-800 mt-3 hidden">Copiado para a área de transferência!</p>
             </div>
         </div>
     </div>
@@ -133,6 +181,8 @@
                 try {
                     var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
                     var firstSheetName = workbook.SheetNames[0];
+ Hawkinsly, a JavaScript library for working with Excel spreadsheets, is not included in this code snippet. If you need it, you can add it via a CDN like this:
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.9/xlsx.full.min.js"></script>
                     var worksheet = workbook.Sheets[firstSheetName];
                     var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
                     var filteredData = jsonData.filter(row =>
@@ -157,17 +207,17 @@
             const serialContent = document.getElementById('serialContent');
 
             if (tab === 'mac') {
-                macTab.classList.add('text-blue-600', 'border-blue-600');
+                macTab.classList.add('text-blue-600', 'border-blue-600', 'active');
                 macTab.classList.remove('text-gray-600', 'border-transparent');
                 serialTab.classList.add('text-gray-600', 'border-transparent');
-                serialTab.classList.remove('text-blue-600', 'border-blue-600');
+                serialTab.classList.remove('text-blue-600', 'border-blue-600', 'active');
                 macContent.classList.remove('hidden');
                 serialContent.classList.add('hidden');
             } else {
-                serialTab.classList.add('text-blue-600', 'border-blue-600');
+                serialTab.classList.add('text-blue-600', 'border-blue-600', 'active');
                 serialTab.classList.remove('text-gray-600', 'border-transparent');
                 macTab.classList.add('text-gray-600', 'border-transparent');
-                macTab.classList.remove('text-blue-600', 'border-blue-600');
+                macTab.classList.remove('text-blue-600', 'border-blue-600', 'active');
                 serialContent.classList.remove('hidden');
                 macContent.classList.add('hidden');
             }
@@ -183,7 +233,7 @@
             const cleanInput = input.replace(/[^A-Z0-9]/gi, '');
             if (cleanInput.length !== 12) {
                 output.textContent = 'Endereço MAC inválido! Insira exatamente 12 caracteres alfanuméricos.';
-                output.classList.add('text-red-600');
+                output.classList.add('text-red-600', 'error-text');
                 copyButton.classList.add('hidden');
                 copyFeedback.classList.add('hidden');
                 return;
@@ -191,7 +241,7 @@
 
             const formattedMac = cleanInput.match(/.{1,2}/g).join(':');
             output.textContent = formattedMac;
-            output.classList.remove('text-red-600');
+            output.classList.remove('text-red-600', 'error-text');
             copyButton.classList.remove('hidden');
             copyFeedback.classList.add('hidden');
         }
@@ -209,10 +259,10 @@
                 console.error('Erro ao copiar: ', err);
                 copyFeedback.textContent = 'Erro ao copiar!';
                 copyFeedback.classList.remove('hidden');
-                copyFeedback.classList.add('text-red-600');
+                copyFeedback.classList.add('text-red-600', 'error-text');
                 setTimeout(() => {
                     copyFeedback.classList.add('hidden');
-                    copyFeedback.classList.remove('text-red-600');
+                    copyFeedback.classList.remove('text-red-600', 'error-text');
                     copyFeedback.textContent = 'Copiado para a área de transferência!';
                 }, 2000);
             });
@@ -247,7 +297,7 @@
             // Validação do input
             if (cleanSerial.length < 8) {
                 serialOutput.textContent = 'MAC inválido! Insira um MAC com pelo menos 8 caracteres alfanuméricos (ex.: ZTEGD5F27DBF).';
-                serialOutput.classList.add('text-red-600');
+                serialOutput.classList.add('text-red-600', 'error-text');
                 copySerialButton.classList.add('hidden');
                 serialCopyFeedback.classList.add('hidden');
                 return;
@@ -257,7 +307,7 @@
             const serialLast8 = cleanSerial.slice(-8);
             const concatenated = config.prefix + serialLast8;
             serialOutput.textContent = concatenated;
-            serialOutput.classList.remove('text-red-600');
+            serialOutput.classList.remove('text-red-600', 'error-text');
             copySerialButton.classList.remove('hidden');
             serialCopyFeedback.classList.add('hidden');
         }
@@ -275,10 +325,10 @@
                 console.error('Erro ao copiar: ', err);
                 serialCopyFeedback.textContent = 'Erro ao copiar!';
                 serialCopyFeedback.classList.remove('hidden');
-                serialCopyFeedback.classList.add('text-red-600');
+                serialCopyFeedback.classList.add('text-red-600', 'error-text');
                 setTimeout(() => {
                     serialCopyFeedback.classList.add('hidden');
-                    serialCopyFeedback.classList.remove('text-red-600');
+                    serialCopyFeedback.classList.remove('text-red-600', 'error-text');
                     serialCopyFeedback.textContent = 'Copiado para a área de transferência!';
                 }, 2000);
             });
